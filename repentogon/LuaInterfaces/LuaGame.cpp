@@ -340,6 +340,43 @@ LUA_FUNCTION(Lua_GetGenericPrompt) {
 	return 1;
 }
 
+LUA_FUNCTION(Lua_GetEnabledMods) {
+    ModManager* modman = g_Manager->GetModManager();
+
+    lua_newtable(L);
+    unsigned int idx = 1;
+    for each (ModEntry* mod in modman->_mods) {
+        if (!mod->IsEnabled()) continue;
+
+        lua_pushnumber(L, idx); // Push the index
+
+        // Create a new table for each mod entry
+        lua_newtable(L);
+
+        // Add modname
+        lua_pushstring(L, "modname");
+        lua_pushstring(L, mod->GetName().c_str());
+        lua_settable(L, -3);
+
+        // Add modID
+        lua_pushstring(L, "modID");
+        lua_pushstring(L, mod->GetId());
+        lua_settable(L, -3);
+
+        // Add version
+        lua_pushstring(L, "version");
+        lua_pushstring(L, mod->GetVersion());
+        lua_settable(L, -3);
+
+        // Set the mod entry table in the main table
+        lua_settable(L, -3);
+
+        idx++;
+    }
+
+	return 1;
+}
+
 HOOK_METHOD(LuaEngine, RegisterClasses, () -> void) {
 	super();
 
@@ -380,6 +417,7 @@ HOOK_METHOD(LuaEngine, RegisterClasses, () -> void) {
 		{ "SetDizzyAmount", Lua_SetDizzyAmount},
 		{ "RecordPlayerCompletion", Lua_RecordPlayerCompletion},
 		{ "GetGenericPrompt", Lua_GetGenericPrompt},
+		{ "GetEnabledMods", Lua_GetEnabledMods},
 		{ NULL, NULL }
 	};
 	lua::RegisterFunctions(_state, lua::Metatables::GAME, functions);
