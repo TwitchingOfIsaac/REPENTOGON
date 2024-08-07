@@ -341,38 +341,40 @@ LUA_FUNCTION(Lua_GetGenericPrompt) {
 }
 
 LUA_FUNCTION(Lua_GetEnabledMods) {
-    ModManager* modman = g_Manager->GetModManager();
+	ModManager* modman = g_Manager->GetModManager();
 
-    lua_newtable(L);
-    unsigned int idx = 1;
-    for each (ModEntry* mod in modman->_mods) {
-        if (!mod->IsEnabled()) continue;
+	lua_newtable(L);
+	int idx = 1;
 
-        lua_pushnumber(L, idx); // Push the index
+	for each (ModEntry* mod in modman->_mods) {
+		if (!mod->IsEnabled()) continue;
 
-        // Create a new table for each mod entry
-        lua_newtable(L);
+		lua_pushnumber(L, idx); // Push the index
 
-        // Add modname
-        lua_pushstring(L, "modname");
-        lua_pushstring(L, mod->GetName().c_str());
-        lua_settable(L, -3);
+		// Create a new table for each mod entry
+		lua_newtable(L);
 
-        // Add modID
-        lua_pushstring(L, "modID");
-        lua_pushstring(L, mod->GetId());
-        lua_settable(L, -3);
+		// Add modname
+		lua_pushstring(L, "name");
+		lua_pushstring(L, mod->GetName().c_str());
+		lua_settable(L, -3);
 
-        // Add version
-        lua_pushstring(L, "version");
-        lua_pushstring(L, mod->GetVersion());
-        lua_settable(L, -3);
+		// Add modID
+		lua_pushstring(L, "id");
+		lua_pushstring(L, mod->GetId());  // Assuming GetId() returns a char* 
+		lua_settable(L, -3);
 
-        // Set the mod entry table in the main table
-        lua_settable(L, -3);
+		// Add version
+		lua_pushstring(L, "version");
+		lua_pushstring(L, mod->GetVersion());  // Assuming GetVersion() returns a char*
+		lua_settable(L, -3);
 
-        idx++;
-    }
+		// Set the mod entry table in the main table
+		lua_settable(L, -3);
+
+		lua_rawseti(L, -2, idx);
+		idx++;
+	}
 
 	return 1;
 }
